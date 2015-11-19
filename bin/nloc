@@ -19,7 +19,8 @@ function list(val) {
    .option('-d, --details', 'print loc per file')
    .option('-e, --exclude <expressions>', 'comma-seperated list of expression to exclude', list)
    .option('-f, --format <format>', /^(simple|clitable|json)$/i, 'simple')
-   .option('--with-encoding', 'include encoding information for each file');
+   .option('--with-encoding', 'include encoding information for each file')
+   .option('--with-size', 'include size information for each file');
 
 // Help Examples
 cli.on('--help', function(){
@@ -37,7 +38,8 @@ if (!process.argv.slice(2).length) {
 } else {
   var target = cli.args[0];
   nloc({
-    target: target
+    target: target,
+    withEncoding: cli.withEncoding
   }, function(err, results) {
     if(err) {
       console.error(err);
@@ -47,6 +49,9 @@ if (!process.argv.slice(2).length) {
           var head = ['File', 'Total', 'Blank', 'Comment'];
           if(cli.withEncoding) {
             head.push('Encoding');
+          }
+          if(cli.withSize) {
+            head.push('Size (Bytes)');
           }
 
           var table = new clitable({
@@ -65,6 +70,9 @@ if (!process.argv.slice(2).length) {
                 if(cli.withEncoding) {
                   detail.push(results[key].analyze.encoding);
                 }
+                if(cli.withSize) {
+                  detail.push(results[key].stats.size);
+                }
                 table.push(detail);
               }
             }
@@ -78,7 +86,10 @@ if (!process.argv.slice(2).length) {
             results.summary.loc.comment,
           ];
           if(cli.withEncoding) {
-            summary.push('');
+            summary.push(' - ');
+          }
+          if(cli.withSize) {
+            summary.push(' - ');
           }
           table.push(summary);
           console.log(table.toString());
@@ -101,6 +112,10 @@ if (!process.argv.slice(2).length) {
                 console.log("---------------------------------------------------");
                 if(cli.withEncoding) {
                   console.log("Encoding    | " + results[key].analyze.encoding);
+                  console.log("---------------------------------------------------");
+                }
+                if(cli.withSize) {
+                  console.log("Size        | " + results[key].stats.size + " Bytes");
                   console.log("---------------------------------------------------");
                 }
                 console.log();
