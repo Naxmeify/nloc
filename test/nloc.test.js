@@ -4,15 +4,31 @@ var nloc = require('..');
 var should = require('should');
 
 describe('nloc', function() {
-  it.only('should return json object with nloc result for mocha.opts file', function(done) {
+  it('should return json object with nloc result for nloc-testfile.js file', function(done) {
+    var target = path.resolve(__dirname, 'nloc-testfile.js');
     nloc({
-      target: path.resolve(__dirname, 'mocha.opts')
-    }, function(err, result) {
+      target: target
+    }, function(err, results) {
       should.not.exist(err);
-      //result.total.should.be.eql(5);
-      console.log(result);
+      results[target].sloc.total.should.be.eql(11);
       done();
     });
+  });
+
+  describe('method analyzeFile()', function() {
+    it("should analyze the file at given filePath");
+  });
+
+  describe('method getFileObj()', function() {
+    it("should return a fileObj for the file at given filePath");
+  });
+
+  describe('method getLoc()', function() {
+    it("should return LOC of the file at given filePath");
+  });
+
+  describe('method getEncoding()', function() {
+    it("should return encoding of the file at given filePath");
   });
 
   describe('method isAbsolute()', function() {

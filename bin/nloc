@@ -19,6 +19,7 @@ function list(val) {
    .option('-d, --details', 'print loc per file')
    .option('-e, --exclude <expressions>', 'comma-seperated list of expression to exclude', list)
    .option('-f, --format <format>', /^(simple|clitable|json)$/i, 'simple')
+   .option('-t, --types <filetypes>', 'comma-seperated list of filetypes for matcher', list)
    .option('--with-encoding', 'include encoding information for each file')
    .option('--with-size', 'include size information for each file');
 
@@ -30,23 +31,28 @@ cli.on('--help', function(){
   console.log('    $ nloc -h');
   console.log('');
 });
-
 // Parse
 cli.parse(process.argv);
+
 if (!process.argv.slice(2).length) {
   cli.outputHelp();
 } else {
   var target = cli.args[0];
-  nloc({
-    target: target,
-    withEncoding: cli.withEncoding
-  }, function(err, results) {
+  var options = {};
+  options.target = target;
+  if(cli.withEncoding) options.withEncoding = cli.withEncoding;
+  if(cli.exclude && cli.exclude.length > 0) options.exclude = cli.exclude;
+  if(cli.types && cli.types.length > 0) options.types = cli.types;
+  nloc(options, function(err, results) {
     if(err) {
       console.error(err);
     } else {
+      if(!nloc.isAbsolute(target)) {
+        target = path.resolve(process.cwd(), target);
+      }
       switch(cli.format) {
         case 'clitable':
-          var head = ['File', 'Total', 'Blank', 'Comment'];
+          var head = ['File', 'Total', 'Empty', 'Comment'];
           if(cli.withEncoding) {
             head.push('Encoding');
           }
@@ -62,10 +68,10 @@ if (!process.argv.slice(2).length) {
             for(var key in results) {
               if(key !== 'summary') {
                 var detail = [
-                  path.relative(target, key),
-                  results[key].analyze.loc.total,
-                  results[key].analyze.loc.blank,
-                  results[key].analyze.loc.comment
+                  target!=key?path.relative(target, key):results[key].name,
+                  results[key].sloc.total,
+                  results[key].sloc.empty,
+                  results[key].sloc.comment
                 ];
                 if(cli.withEncoding) {
                   detail.push(results[key].analyze.encoding);
@@ -80,9 +86,9 @@ if (!process.argv.slice(2).length) {
 
           // summary
           var summary = [
-            'SUMMARY',
+            'SUMMARY('+results.summary.files+')',
             results.summary.loc.total,
-            results.summary.loc.blank,
+            results.summary.loc.empty,
             results.summary.loc.comment,
           ];
           if(cli.withEncoding) {
@@ -97,18 +103,17 @@ if (!process.argv.slice(2).length) {
         case 'json': break;
         case 'simple':
         default:
-          // console.log(Object.keys(results));
           if(cli.details) {
             for(var key in results) {
               if(key !== 'summary') {
-                console.log(path.relative(target, key));
+                console.log(target!=key?path.relative(target, key):results[key].name);
                 console.log("Type        | Value");
                 console.log("---------------------------------------------------");
-                console.log("Total LOC   | " + results[key].analyze.loc.total);
+                console.log("Total LOC   | " + results[key].sloc.total);
                 console.log("---------------------------------------------------");
-                console.log("Blank LOC   | " + results[key].analyze.loc.blank);
+                console.log("Empty LOC   | " + results[key].sloc.empty);
                 console.log("---------------------------------------------------");
-                console.log("Comment LOC | " + results[key].analyze.loc.comment);
+                console.log("Comment LOC | " + results[key].sloc.comment);
                 console.log("---------------------------------------------------");
                 if(cli.withEncoding) {
                   console.log("Encoding    | " + results[key].analyze.encoding);
@@ -130,7 +135,7 @@ if (!process.argv.slice(2).length) {
           console.log("---------------------------------------------------");
           console.log("Total LOC   | " + results.summary.loc.total);
           console.log("---------------------------------------------------");
-          console.log("Blank LOC   | " + results.summary.loc.blank);
+          console.log("Empty LOC   | " + results.summary.loc.empty);
           console.log("---------------------------------------------------");
           console.log("Comment LOC | " + results.summary.loc.comment);
           console.log("---------------------------------------------------");
