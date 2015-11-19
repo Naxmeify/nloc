@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 
 // Requirements
+var path = require('path');
 var pkg = require('../package.json');
 var cli = require('commander');
 var nloc = require('..');
+var clitable = require('cli-table');
 
 // Helper Methods for options
 function list(val) {
@@ -30,11 +32,95 @@ cli.on('--help', function(){
 
 // Parse
 cli.parse(process.argv);
-
 if (!process.argv.slice(2).length) {
   cli.outputHelp();
 } else {
+  var target = cli.args[0];
   nloc({
-    target: cli.args[0]
+    target: target
+  }, function(err, results) {
+    if(err) {
+      console.error(err);
+    } else {
+      switch(cli.format) {
+        case 'clitable':
+          var head = ['File', 'Total', 'Blank', 'Comment'];
+          if(cli.withEncoding) {
+            head.push('Encoding');
+          }
+
+          var table = new clitable({
+            head: head
+          });
+
+          if(cli.details) {
+            for(var key in results) {
+              if(key !== 'summary') {
+                var detail = [
+                  path.relative(target, key),
+                  results[key].analyze.loc.total,
+                  results[key].analyze.loc.blank,
+                  results[key].analyze.loc.comment
+                ];
+                if(cli.withEncoding) {
+                  detail.push(results[key].analyze.encoding);
+                }
+                table.push(detail);
+              }
+            }
+          }
+
+          // summary
+          var summary = [
+            'SUMMARY',
+            results.summary.loc.total,
+            results.summary.loc.blank,
+            results.summary.loc.comment,
+          ];
+          if(cli.withEncoding) {
+            summary.push('');
+          }
+          table.push(summary);
+          console.log(table.toString());
+          break;
+        case 'json': break;
+        case 'simple':
+        default:
+          // console.log(Object.keys(results));
+          if(cli.details) {
+            for(var key in results) {
+              if(key !== 'summary') {
+                console.log(path.relative(target, key));
+                console.log("Type        | Value");
+                console.log("---------------------------------------------------");
+                console.log("Total LOC   | " + results[key].analyze.loc.total);
+                console.log("---------------------------------------------------");
+                console.log("Blank LOC   | " + results[key].analyze.loc.blank);
+                console.log("---------------------------------------------------");
+                console.log("Comment LOC | " + results[key].analyze.loc.comment);
+                console.log("---------------------------------------------------");
+                if(cli.withEncoding) {
+                  console.log("Encoding    | " + results[key].analyze.encoding);
+                  console.log("---------------------------------------------------");
+                }
+                console.log();
+              }
+            }
+          }
+
+          console.log("SUMMARY");
+          console.log("Type        | Value");
+          console.log("---------------------------------------------------");
+          console.log("Files       | " + results.summary.files);
+          console.log("---------------------------------------------------");
+          console.log("Total LOC   | " + results.summary.loc.total);
+          console.log("---------------------------------------------------");
+          console.log("Blank LOC   | " + results.summary.loc.blank);
+          console.log("---------------------------------------------------");
+          console.log("Comment LOC | " + results.summary.loc.comment);
+          console.log("---------------------------------------------------");
+          break;
+      }
+    }
   });
 }
