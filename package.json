@@ -1,6 +1,6 @@
 {
   "name": "nloc",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "naxmeify lines of code tool",
   "main": "./lib/nloc.js",
   "bin": {
