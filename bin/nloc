@@ -1,0 +1,35 @@
+#!/usr/bin/env node
+
+// Requirements
+var pkg = require('../package.json');
+var cli = require('commander');
+
+// Helper Methods for options
+function list(val) {
+  return val.split(',');
+}
+
+// CLI Config
+ cli
+   .version(pkg.version)
+   .usage('[options] <file|directory>')
+   .option('-d, --details', 'print loc per file')
+   .option('-e, --exclude <expressions>', 'comma-seperated list of expression to exclude', list)
+   .option('-f, --format <format>', /^(simple|clitable|json)$/i, 'simple')
+   .option('--with-encoding', 'include encoding information for each file');
+
+// Help Examples
+cli.on('--help', function(){
+  console.log('  Examples:');
+  console.log('');
+  console.log('    $ nloc --help');
+  console.log('    $ nloc -h');
+  console.log('');
+});
+
+// Parse
+cli.parse(process.argv);
+
+if (!process.argv.slice(2).length) {
+  cli.outputHelp();
+}

@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "naxmeify lines of code tool",
   "main": "./lib/nloc.js",
+  "bin": {
+    "nloc": "./bin/nloc"
+  },
   "directories": {
     "test": "test"
   },
@@ -25,7 +28,9 @@
     "url": "https://github.com/Naxmeify/nloc/issues"
   },
   "homepage": "https://github.com/Naxmeify/nloc#readme",
-  "dependencies": {},
+  "dependencies": {
+    "commander": "^2.9.0"
+  },
   "devDependencies": {
     "mocha": "^2.3.4",
     "should": "^7.1.1"
