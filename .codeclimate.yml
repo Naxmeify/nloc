@@ -1,0 +1,19 @@
+languages:
+  JavaScript: true
+
+exclude_paths:
+- ".gitignore"
+- "LICENSE"
+- "README.md"
+- ".travis.yml"
+
+engines:
+  coffeelint:
+    enabled: true
+
+ratings:
+   paths:
+   - lib/**
+   - bin/**
+   - "**.coffee"
+   - "**.js"
