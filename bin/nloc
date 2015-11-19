@@ -3,6 +3,7 @@
 // Requirements
 var pkg = require('../package.json');
 var cli = require('commander');
+var nloc = require('..');
 
 // Helper Methods for options
 function list(val) {
@@ -33,3 +34,7 @@ cli.parse(process.argv);
 if (!process.argv.slice(2).length) {
   cli.outputHelp();
 }
+
+nloc({
+  target: cli.args[0]
+});
