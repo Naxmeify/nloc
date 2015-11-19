@@ -18,6 +18,24 @@ $ npm install --global nloc
 $ npm install nloc
 ```
 
+## Usage
+```
+Usage: nloc [options] <file|directory>
+
+Options:
+
+  -h, --help                   output usage information
+  -V, --version                output the version number
+  -d, --details                print loc per file
+  -e, --exclude <expressions>  comma-seperated list of expression to exclude
+  -f, --format <format>        /^(simple|clitable|json)$/i
+  --with-encoding              include encoding information for each file
+
+Examples:
+
+  $ nloc --help
+  $ nloc -h
+```
 
 ## Contribution
 
